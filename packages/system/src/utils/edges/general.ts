@@ -13,6 +13,13 @@ export function getEdgeCenter({
   targetX: number;
   targetY: number;
 }): [number, number, number, number] {
+  //@ verify
+  //@ ensures \result[2] >= 0
+  //@ ensures \result[3] >= 0
+  //@ ensures (sourceX <= targetX ==> sourceX <= \result[0] && \result[0] <= targetX)
+  //@ ensures (targetX <= sourceX ==> targetX <= \result[0] && \result[0] <= sourceX)
+  //@ ensures (sourceY <= targetY ==> sourceY <= \result[1] && \result[1] <= targetY)
+  //@ ensures (targetY <= sourceY ==> targetY <= \result[1] && \result[1] <= sourceY)
   const xOffset = Math.abs(targetX - sourceX) / 2;
   const centerX = targetX < sourceX ? targetX + xOffset : targetX - xOffset;
 

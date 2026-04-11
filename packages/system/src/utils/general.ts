@@ -84,6 +84,13 @@ export const getBoundsOfBoxes = (box1: Box, box2: Box): Box => ({
   y2: Math.max(box1.y2, box2.y2),
 });
 
+//@ declare-type Box { x: number, y: number, x2: number, y2: number }
+//@ declare-type Rect { x: number, y: number, width: number, height: number }
+//@ verify
+//@ ensures \result.x === x
+//@ ensures \result.y === y
+//@ ensures \result.x2 === x + width
+//@ ensures \result.y2 === y + height
 export const rectToBox = ({ x, y, width, height }: Rect): Box => ({
   x,
   y,
@@ -91,6 +98,11 @@ export const rectToBox = ({ x, y, width, height }: Rect): Box => ({
   y2: y + height,
 });
 
+//@ verify
+//@ ensures \result.x === x
+//@ ensures \result.y === y
+//@ ensures \result.width === x2 - x
+//@ ensures \result.height === y2 - y
 export const boxToRect = ({ x, y, x2, y2 }: Box): Rect => ({
   x,
   y,
