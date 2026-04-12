@@ -1,4 +1,7 @@
 //@ declare-type EdgeBase { id: string, source: string, target: string, sourceHandle: string | undefined, targetHandle: string | undefined }
+//@ declare-type Connection { source: string, target: string, sourceHandle: string | undefined, targetHandle: string | undefined }
+//@ declare-type AddEdgeOptions { }
+//@ declare-type GetEdgeId { }
 import { Connection, InternalNodeBase, Transform, errorMessages, isEdgeBase, EdgeBase, ZIndexMode } from '../..';
 import { getOverlappingArea, boxToRect, nodeToBox, getBoundsOfBoxes, devWarn } from '../general';
 
@@ -147,15 +150,22 @@ export const addEdge = <EdgeType extends EdgeBase>(
   edges: EdgeType[],
   options: AddEdgeOptions = {}
 ): EdgeType[] => {
+  //@ verify
+  //@ ensures \result.length >= edges.length
+  //@ ensures \result.length <= edges.length + 1
   if (!edgeParams.source || !edgeParams.target) {
+    //@ skip
     devWarn('006', errorMessages['error006']());
 
     return edges;
   }
 
+  //@ havoc
   const edgeIdGenerator = options.getEdgeId || getEdgeId;
 
+  //@ havoc
   let edge: EdgeType;
+  //@ skip
   if (isEdgeBase(edgeParams)) {
     edge = { ...edgeParams };
   } else {
@@ -169,10 +179,12 @@ export const addEdge = <EdgeType extends EdgeBase>(
     return edges;
   }
 
+  //@ skip
   if (edge.sourceHandle === null) {
     delete edge.sourceHandle;
   }
 
+  //@ skip
   if (edge.targetHandle === null) {
     delete edge.targetHandle;
   }

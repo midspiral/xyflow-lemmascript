@@ -6,6 +6,12 @@ function MathAbs(x: int): nat { if x >= 0 then x else -x }
 
 datatype EdgeBase = EdgeBase(id: string, source: string, target: string, sourceHandle: Option<string>, targetHandle: Option<string>)
 
+datatype Connection = Connection(source: string, target: string, sourceHandle: Option<string>, targetHandle: Option<string>)
+
+datatype AddEdgeOptions = AddEdgeOptions()
+
+datatype GetEdgeId = GetEdgeId()
+
 function getEdgeCenter(sourceX: int, sourceY: int, targetX: int, targetY: int): seq<int>
 {
   var xOffset := (MathAbs((targetX - sourceX)) / 2);
@@ -34,4 +40,20 @@ lemma connectionExists_ensures(edge: EdgeBase, edges: seq<EdgeBase>)
   ensures ((connectionExists(edge, edges) == true) ==> (|edges| > 0))
   ensures ((|edges| == 0) ==> (connectionExists(edge, edges) == false))
 {
+}
+
+method addEdge(edgeParams: Connection, edges: seq<EdgeBase>, options: AddEdgeOptions) returns (res: seq<EdgeBase>)
+  ensures (|res| >= |edges|)
+  ensures (|res| <= (|edges| + 1))
+{
+  if ((edgeParams.source == "") || (edgeParams.target == "")) {
+    return edges;
+  }
+  var edgeIdGenerator: GetEdgeId := *;
+  var edge: EdgeBase := *;
+  var i_t0 := connectionExists(edge, edges);
+  if i_t0 {
+    return edges;
+  }
+  return (edges + [edge]);
 }
