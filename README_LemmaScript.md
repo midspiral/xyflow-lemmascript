@@ -22,6 +22,10 @@ LemmaScript annotates TypeScript directly with `//@ ` specifications and generat
 - Result length >= input length (never loses edges)
 - Result length <= input length + 1 (adds at most one)
 
+**`reconnectEdge`** — Replaces an existing edge with a new connection.
+- Result length >= 1 (or input was empty)
+- Result length <= input length + 1
+
 ### Geometry Utilities (`packages/system/src/utils/general.ts`)
 
 **`clamp`** — Clamps a value to [min, max].
