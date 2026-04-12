@@ -36,6 +36,10 @@ LemmaScript annotates TypeScript directly with `//@ ` specifications and generat
 **`getOverlappingArea`** — Computes overlap area of two rectangles.
 - Result is non-negative
 
+**`areSetsEqual`** — Checks if two string sets are equal by size + membership.
+- True result implies same size
+- True result implies a is subset of b (forall x in a ==> x in b)
+
 ## Setup
 
 **Prerequisites:** [Dafny](https://github.com/dafny-lang/dafny) ≥ 4.0, Node.js ≥ 18.
