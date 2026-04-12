@@ -1,3 +1,4 @@
+//@ declare-type EdgeBase { id: string, source: string, target: string, sourceHandle: string | undefined, targetHandle: string | undefined }
 import { Connection, InternalNodeBase, Transform, errorMessages, isEdgeBase, EdgeBase, ZIndexMode } from '../..';
 import { getOverlappingArea, boxToRect, nodeToBox, getBoundsOfBoxes, devWarn } from '../general';
 
@@ -109,6 +110,9 @@ export const getEdgeId = ({ source, sourceHandle, target, targetHandle }: Connec
   `xy-edge__${source}${sourceHandle || ''}-${target}${targetHandle || ''}`;
 
 const connectionExists = (edge: EdgeBase, edges: EdgeBase[]) => {
+  //@ verify
+  //@ ensures \result === true ==> edges.length > 0
+  //@ ensures edges.length === 0 ==> \result === false
   return edges.some(
     (el) =>
       el.source === edge.source &&
