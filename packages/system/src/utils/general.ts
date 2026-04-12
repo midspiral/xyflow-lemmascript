@@ -410,6 +410,9 @@ export function evaluateAbsolutePosition(
   return positionAbsolute;
 }
 
+//@ verify
+//@ ensures \result === true ==> a.size === b.size
+//@ ensures \result === true ==> forall(x: string, x in a ==> x in b)
 export function areSetsEqual(a: Set<string>, b: Set<string>) {
   if (a.size !== b.size) {
     return false;
