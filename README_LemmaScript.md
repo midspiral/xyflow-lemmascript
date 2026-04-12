@@ -1,6 +1,7 @@
 # xyflow — Verified with LemmaScript
 
 This is a fork of [xyflow/xyflow](https://github.com/xyflow/xyflow) with formal verification of core utility functions using [LemmaScript](https://github.com/midspiral/LemmaScript).
+[View as diff](https://github.com/midspiral/xyflow-lemmascript/compare/main..lemmascript).
 
 LemmaScript annotates TypeScript directly with `//@ ` specifications and generates Dafny for verification. The original code is unchanged — only annotation comments are added.
 
