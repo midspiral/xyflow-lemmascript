@@ -226,24 +226,33 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
   edges: EdgeType[],
   options: ReconnectEdgeOptions = { shouldReplaceId: true }
 ): EdgeType[] => {
+  //@ verify
+  //@ ensures \result.length >= 1 || edges.length === 0
+  //@ ensures \result.length <= edges.length + 1
+  //@ havoc : string, unknown
   const { id: oldEdgeId, ...rest } = oldEdge;
 
   if (!newConnection.source || !newConnection.target) {
+    //@ skip
     devWarn('006', errorMessages['error006']());
 
     return edges;
   }
 
+  //@ havoc : EdgeBase | undefined
   const foundEdge = edges.find((e) => e.id === oldEdge.id) as EdgeType;
 
   if (!foundEdge) {
+    //@ skip
     devWarn('007', errorMessages['error007'](oldEdgeId));
 
     return edges;
   }
 
+  //@ havoc
   const edgeIdGenerator = options.getEdgeId || getEdgeId;
 
+  //@ havoc
   // Remove old edge and create the new edge with parameters of old edge.
   const edge = {
     ...rest,
