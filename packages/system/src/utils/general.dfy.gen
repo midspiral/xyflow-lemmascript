@@ -3,6 +3,7 @@
 method SetToSeq<T>(s: set<T>) returns (res: seq<T>)
   ensures forall x :: x in s <==> x in res
   ensures |res| == |s|
+  ensures forall i, j :: 0 <= i < j < |res| ==> res[i] != res[j]
 {
   var remaining := s;
   res := [];
@@ -10,6 +11,7 @@ method SetToSeq<T>(s: set<T>) returns (res: seq<T>)
     invariant remaining <= s
     invariant forall x :: x in res <==> (x in s && x !in remaining)
     invariant |res| + |remaining| == |s|
+    invariant forall i, j :: 0 <= i < j < |res| ==> res[i] != res[j]
     decreases remaining
   {
     var x :| x in remaining;
