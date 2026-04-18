@@ -70,10 +70,12 @@ method reconnectEdge(oldEdge: EdgeBase, newConnection: Connection, edges: seq<Ed
     return edges;
   }
   var foundEdge: Option<EdgeBase> := *;
-  if (match foundEdge { case Some(i_value) => false case None => true }) {
-    return edges;
+  match foundEdge {
+    case Some(i_foundEdge_val) =>
+      var edgeIdGenerator: GetEdgeId := *;
+      var edge: EdgeBase := *;
+      return (Std.Collections.Seq.Filter((e: EdgeBase) => (e.id != oldEdgeId), edges) + [edge]);
+    case None =>
+      return edges;
   }
-  var edgeIdGenerator: GetEdgeId := *;
-  var edge: EdgeBase := *;
-  return (Std.Collections.Seq.Filter((e: EdgeBase) => (e.id != oldEdgeId), edges) + [edge]);
 }
