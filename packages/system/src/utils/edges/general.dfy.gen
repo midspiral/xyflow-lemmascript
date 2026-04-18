@@ -17,9 +17,9 @@ datatype ReconnectEdgeOptions = ReconnectEdgeOptions(shouldReplaceId: bool, getE
 function getEdgeCenter(sourceX: int, sourceY: int, targetX: int, targetY: int): seq<int>
 {
   var xOffset := (MathAbs((targetX - sourceX)) / 2);
-  var centerX := if (targetX < sourceX) then (targetX + xOffset) else (targetX - xOffset);
+  var centerX := (if (targetX < sourceX) then (targetX + xOffset) else (targetX - xOffset));
   var yOffset := (MathAbs((targetY - sourceY)) / 2);
-  var centerY := if (targetY < sourceY) then (targetY + yOffset) else (targetY - yOffset);
+  var centerY := (if (targetY < sourceY) then (targetY + yOffset) else (targetY - yOffset));
   [centerX, centerY, xOffset, yOffset]
 }
 
