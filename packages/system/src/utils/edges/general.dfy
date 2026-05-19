@@ -60,12 +60,18 @@ method addEdge(edgeParams: Connection, edges: seq<EdgeBase>, options: AddEdgeOpt
   return (edges + [edge]);
 }
 
-// AXIOM (pending proof): Std.Collections.Seq.Filter strictly shrinks when at
-// least one element fails the predicate. True by induction on |s| with reveal
-// Filter(); my one-pass attempt didn't close — parked.
-lemma {:axiom} FilterStrict<T(!new)>(p: T -> bool, s: seq<T>)
+lemma FilterStrict<T(!new)>(p: T ~> bool, s: seq<T>)
+  requires forall i :: 0 <= i < |s| ==> p.requires(s[i])
   requires exists i :: 0 <= i < |s| && !p(s[i])
   ensures |Std.Collections.Seq.Filter(p, s)| < |s|
+{
+  reveal Std.Collections.Seq.Filter;
+  var k :| 0 <= k < |s| && !p(s[k]);
+  if p(s[0]) {
+    assert !p(s[1..][k-1]);
+    FilterStrict(p, s[1..]);
+  }
+}
 
 method reconnectEdge(oldEdge: EdgeBase, newConnection: Connection, edges: seq<EdgeBase>, options: ReconnectEdgeOptions) returns (res: seq<EdgeBase>)
   requires forall i: nat, j: nat :: ((i < |edges|) ==> (j < |edges|) ==> (i != j) ==> (edges[i].id != edges[j].id))

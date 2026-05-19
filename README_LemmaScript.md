@@ -22,9 +22,12 @@ LemmaScript annotates TypeScript directly with `//@ ` specifications and generat
 - Result length >= input length (never loses edges)
 - Result length <= input length + 1 (adds at most one)
 
-**`reconnectEdge`** — Replaces an existing edge with a new connection.
+**`reconnectEdge`** — Replaces an existing edge with a new connection. Under a unique-id precondition:
 - Result length >= 1 (or input was empty)
-- Result length <= input length + 1
+- Result length <= input length (in-place; no insertion)
+- When a matching edge existed and `newConnection.source`/`target` are non-empty, the result contains an edge with those endpoints
+
+Trust manifest: destructuring (`oldEdgeId === oldEdge.id`), `find` semantics on both branches, and constructed edge fields (`edge.source === newConnection.source`, `edge.target === newConnection.target`).
 
 ### Geometry Utilities (`packages/system/src/utils/general.ts`)
 
