@@ -61,19 +61,26 @@ method addEdge(edgeParams: Connection, edges: seq<EdgeBase>, options: AddEdgeOpt
 }
 
 method reconnectEdge(oldEdge: EdgeBase, newConnection: Connection, edges: seq<EdgeBase>, options: ReconnectEdgeOptions) returns (res: seq<EdgeBase>)
+  requires forall i: nat, j: nat :: ((i < |edges|) ==> (j < |edges|) ==> (i != j) ==> (edges[i].id != edges[j].id))
   ensures ((|res| >= 1) || (|edges| == 0))
-  ensures (|res| <= (|edges| + 1))
+  ensures (|res| <= |edges|)
+  ensures ((exists i: nat :: ((i < |edges|) && (edges[i].id == oldEdge.id))) ==> (newConnection.source != "") ==> (newConnection.target != "") ==> exists j: nat :: (((j < |res|) && (res[j].source == newConnection.source)) && (res[j].target == newConnection.target)))
 {
   var oldEdgeId: string := *;
   var rest: int := *;
+  assume {:axiom} (oldEdgeId == oldEdge.id);
   if ((newConnection.source == "") || (newConnection.target == "")) {
     return edges;
   }
   var foundEdge: Option<EdgeBase> := *;
+  assume {:axiom} (match foundEdge { case Some(i_foundEdge_val) => exists i: nat :: ((i < |edges|) && (edges[i].id == oldEdge.id)) case None => true });
+  assume {:axiom} ((match foundEdge { case Some(i_) => false case None => true }) ==> forall i: nat :: ((i < |edges|) ==> (edges[i].id != oldEdge.id)));
   match foundEdge {
     case Some(i_foundEdge_val) =>
       var edgeIdGenerator: GetEdgeId := *;
       var edge: EdgeBase := *;
+      assume {:axiom} (edge.source == newConnection.source);
+      assume {:axiom} (edge.target == newConnection.target);
       return (Std.Collections.Seq.Filter((e: EdgeBase) => (e.id != oldEdgeId), edges) + [edge]);
     case None =>
       return edges;

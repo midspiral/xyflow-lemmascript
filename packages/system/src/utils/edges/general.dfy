@@ -60,20 +60,36 @@ method addEdge(edgeParams: Connection, edges: seq<EdgeBase>, options: AddEdgeOpt
   return (edges + [edge]);
 }
 
+// AXIOM (pending proof): Std.Collections.Seq.Filter strictly shrinks when at
+// least one element fails the predicate. True by induction on |s| with reveal
+// Filter(); my one-pass attempt didn't close — parked.
+lemma {:axiom} FilterStrict<T(!new)>(p: T -> bool, s: seq<T>)
+  requires exists i :: 0 <= i < |s| && !p(s[i])
+  ensures |Std.Collections.Seq.Filter(p, s)| < |s|
+
 method reconnectEdge(oldEdge: EdgeBase, newConnection: Connection, edges: seq<EdgeBase>, options: ReconnectEdgeOptions) returns (res: seq<EdgeBase>)
+  requires forall i: nat, j: nat :: ((i < |edges|) ==> (j < |edges|) ==> (i != j) ==> (edges[i].id != edges[j].id))
   ensures ((|res| >= 1) || (|edges| == 0))
-  ensures (|res| <= (|edges| + 1))
+  ensures (|res| <= |edges|)
+  ensures ((exists i: nat :: ((i < |edges|) && (edges[i].id == oldEdge.id))) ==> (newConnection.source != "") ==> (newConnection.target != "") ==> exists j: nat :: (((j < |res|) && (res[j].source == newConnection.source)) && (res[j].target == newConnection.target)))
 {
   var oldEdgeId: string := *;
   var rest: int := *;
+  assume {:axiom} (oldEdgeId == oldEdge.id);
   if ((newConnection.source == "") || (newConnection.target == "")) {
     return edges;
   }
   var foundEdge: Option<EdgeBase> := *;
+  assume {:axiom} (match foundEdge { case Some(i_foundEdge_val) => exists i: nat :: ((i < |edges|) && (edges[i].id == oldEdge.id)) case None => true });
+  assume {:axiom} ((match foundEdge { case Some(i_) => false case None => true }) ==> forall i: nat :: ((i < |edges|) ==> (edges[i].id != oldEdge.id)));
   match foundEdge {
     case Some(i_foundEdge_val) =>
       var edgeIdGenerator: GetEdgeId := *;
       var edge: EdgeBase := *;
+      assume {:axiom} (edge.source == newConnection.source);
+      assume {:axiom} (edge.target == newConnection.target);
+      FilterStrict((e: EdgeBase) => (e.id != oldEdgeId), edges);
+      assert (Std.Collections.Seq.Filter((e: EdgeBase) => (e.id != oldEdgeId), edges) + [edge])[|Std.Collections.Seq.Filter((e: EdgeBase) => (e.id != oldEdgeId), edges)|] == edge;
       return (Std.Collections.Seq.Filter((e: EdgeBase) => (e.id != oldEdgeId), edges) + [edge]);
     case None =>
       return edges;

@@ -227,10 +227,13 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
   options: ReconnectEdgeOptions = { shouldReplaceId: true }
 ): EdgeType[] => {
   //@ verify
+  //@ requires forall(i: nat, forall(j: nat, i < edges.length && j < edges.length && i !== j ==> edges[i].id !== edges[j].id))
   //@ ensures \result.length >= 1 || edges.length === 0
-  //@ ensures \result.length <= edges.length + 1
+  //@ ensures \result.length <= edges.length
+  //@ ensures (exists(i: nat, i < edges.length && edges[i].id === oldEdge.id)) && newConnection.source !== "" && newConnection.target !== "" ==> exists(j: nat, j < \result.length && \result[j].source === newConnection.source && \result[j].target === newConnection.target)
   //@ havoc : string, unknown
   const { id: oldEdgeId, ...rest } = oldEdge;
+  //@ assume oldEdgeId === oldEdge.id
 
   if (!newConnection.source || !newConnection.target) {
     //@ skip
@@ -241,6 +244,8 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
 
   //@ havoc : EdgeBase | undefined
   const foundEdge = edges.find((e) => e.id === oldEdge.id) as EdgeType;
+  //@ assume foundEdge !== undefined ==> exists(i: nat, i < edges.length && edges[i].id === oldEdge.id)
+  //@ assume foundEdge === undefined ==> forall(i: nat, i < edges.length ==> edges[i].id !== oldEdge.id)
 
   if (!foundEdge) {
     //@ skip
@@ -262,6 +267,8 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
     sourceHandle: newConnection.sourceHandle,
     targetHandle: newConnection.targetHandle,
   } as EdgeType;
+  //@ assume edge.source === newConnection.source
+  //@ assume edge.target === newConnection.target
 
   return edges.filter((e) => e.id !== oldEdgeId).concat(edge);
 };
