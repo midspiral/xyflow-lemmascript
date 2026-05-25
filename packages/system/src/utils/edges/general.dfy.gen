@@ -14,22 +14,22 @@ datatype GetEdgeId = GetEdgeId()
 
 datatype ReconnectEdgeOptions = ReconnectEdgeOptions(shouldReplaceId: Option<bool>, getEdgeId: Option<GetEdgeId>)
 
-function getEdgeCenter(sourceX: int, sourceY: int, targetX: int, targetY: int): seq<int>
+function getEdgeCenter(sourceX: int, sourceY: int, targetX: int, targetY: int): seq<real>
 {
-  var xOffset := (MathAbs((targetX - sourceX)) / 2);
-  var centerX := (if (targetX < sourceX) then (targetX + xOffset) else (targetX - xOffset));
-  var yOffset := (MathAbs((targetY - sourceY)) / 2);
-  var centerY := (if (targetY < sourceY) then (targetY + yOffset) else (targetY - yOffset));
+  var xOffset := ((MathAbs((targetX - sourceX)) as real) / (2 as real));
+  var centerX := (if (targetX < sourceX) then ((targetX as real) + xOffset) else ((targetX as real) - xOffset));
+  var yOffset := ((MathAbs((targetY - sourceY)) as real) / (2 as real));
+  var centerY := (if (targetY < sourceY) then ((targetY as real) + yOffset) else ((targetY as real) - yOffset));
   [centerX, centerY, xOffset, yOffset]
 }
 
 lemma getEdgeCenter_ensures(sourceX: int, sourceY: int, targetX: int, targetY: int)
-  ensures (getEdgeCenter(sourceX, sourceY, targetX, targetY)[2] >= 0)
-  ensures (getEdgeCenter(sourceX, sourceY, targetX, targetY)[3] >= 0)
-  ensures ((sourceX <= targetX) ==> ((sourceX <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[0]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[0] <= targetX)))
-  ensures ((targetX <= sourceX) ==> ((targetX <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[0]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[0] <= sourceX)))
-  ensures ((sourceY <= targetY) ==> ((sourceY <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[1]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[1] <= targetY)))
-  ensures ((targetY <= sourceY) ==> ((targetY <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[1]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[1] <= sourceY)))
+  ensures (getEdgeCenter(sourceX, sourceY, targetX, targetY)[2] >= (0 as real))
+  ensures (getEdgeCenter(sourceX, sourceY, targetX, targetY)[3] >= (0 as real))
+  ensures ((sourceX <= targetX) ==> (((sourceX as real) <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[0]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[0] <= (targetX as real))))
+  ensures ((targetX <= sourceX) ==> (((targetX as real) <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[0]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[0] <= (sourceX as real))))
+  ensures ((sourceY <= targetY) ==> (((sourceY as real) <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[1]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[1] <= (targetY as real))))
+  ensures ((targetY <= sourceY) ==> (((targetY as real) <= getEdgeCenter(sourceX, sourceY, targetX, targetY)[1]) && (getEdgeCenter(sourceX, sourceY, targetX, targetY)[1] <= (sourceY as real))))
 {
 }
 

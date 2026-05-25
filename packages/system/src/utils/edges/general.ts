@@ -18,6 +18,7 @@ export function getEdgeCenter({
   targetY: number;
 }): [number, number, number, number] {
   //@ verify
+  //@ type \result real[]
   //@ ensures \result[2] >= 0
   //@ ensures \result[3] >= 0
   //@ ensures (sourceX <= targetX ==> sourceX <= \result[0] && \result[0] <= targetX)
