@@ -3,9 +3,23 @@
 This is a fork of [xyflow/xyflow](https://github.com/xyflow/xyflow) with formal verification of core utility functions using [LemmaScript](https://github.com/midspiral/LemmaScript).
 [View as diff](https://github.com/midspiral/xyflow-lemmascript/compare/main..lemmascript).
 
-LemmaScript annotates TypeScript directly with `//@ ` specifications and generates Dafny for verification. The original code is unchanged — only annotation comments are added.
+LemmaScript annotates TypeScript directly with `//@ ` specifications and generates Dafny for verification. For the utility functions below, the original code is unchanged — only annotation comments are added. The cycle-prevention gate is different: it adds new verified functions rather than annotating existing ones.
 
 ## What's Verified
+
+### Cycle Prevention (`packages/system/src/utils/graph.ts`)
+
+Gates connections so the graph stays acyclic. Node-level (source/target ids), next to `getOutgoers`/`getIncomers`.
+
+**`canReach`** — bounded reachability search; terminates, and decides the path-witness predicate `reach` exactly.
+- Sound: `\result ==> reach(edges, from, to)`
+- Complete: `reach(edges, from, to) ==> \result`
+
+**`wouldCreateCycle`** — `canReach(edges, target, source)`: adding `source -> target` makes a cycle iff `target` already reaches `source` (reflexivity rejects self-loops too).
+
+**Acyclicity bridge** — `acyclic(edges) ==> ( acyclic(edges + e) <==> !wouldCreateCycle(edges, src, tgt) )`: gated insertion never creates a cycle, and never blocks a safe edge.
+
+Predicate `reach` and the path lemmas are hand-written in `graph.dfy` (additions-only). Trust manifest: proof is over `EdgeBase[]`/node ids (no React), and holds only if every commit routes through the gate. Demonstrated in the `CycleGate` example (`examples/react/src/examples/CycleGate/`) via `onConnect` (commit) + `isValidConnection` (drag feedback); drag a loop and it is rejected on screen.
 
 ### Edge Utilities (`packages/system/src/utils/edges/general.ts`)
 

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+//@ declare-type EdgeBase { id: string, source: string, target: string }
 import {
   boxToRect,
   clampPosition,
@@ -135,6 +136,38 @@ export const getIncomers = <NodeType extends NodeBase = NodeBase, EdgeType exten
 
   return nodes.filter((n) => incomersIds.has(n.id));
 };
+
+// ─── Verified DAG-preserving connection gate ────────────────────────────────────
+// Node-level cycle reasoning over the flat edge list. Handles live within a node and
+// are irrelevant to node-level cycles, so only id/source/target matter.
+
+// Reflexive reachability over the edge list: bounded BFS from `from`, terminating
+// because `visited` grows monotonically toward the finite set of node ids.
+function canReach(edges: EdgeBase[], from: string, to: string): boolean {
+  //@ verify
+  let frontier: string[] = [from];
+  let visited: string[] = [];
+  while (frontier.length > 0) {
+    const cur = frontier[0];
+    frontier = frontier.slice(1);
+    if (cur === to) {
+      return true;
+    }
+    if (!visited.includes(cur)) {
+      visited = [...visited, cur];
+      const succ = edges.filter((e) => e.source === cur).map((e) => e.target);
+      frontier = [...frontier, ...succ];
+    }
+  }
+  return false;
+}
+
+// The gate: adding `source -> target` to an acyclic graph creates a cycle iff
+// `target` can already reach `source`. Reflexivity also rejects self-loops.
+export function wouldCreateCycle(edges: EdgeBase[], source: string, target: string): boolean {
+  //@ verify
+  return canReach(edges, target, source);
+}
 
 export const getNodePositionWithOrigin = (node: NodeBase, nodeOrigin: NodeOrigin = [0, 0]): XYPosition => {
   const { width, height } = getNodeDimensions(node);

@@ -9,6 +9,7 @@ import ControlledViewport from '../examples/ControlledViewport';
 import CustomConnectionLine from '../examples/CustomConnectionLine';
 import CustomMiniMapNode from '../examples/CustomMiniMapNode';
 import CustomNode from '../examples/CustomNode';
+import CycleGate from '../examples/CycleGate';
 import DefaultEdgeOverwrite from '../examples/DefaultEdgeOverwrite';
 import DefaultNodeOverwrite from '../examples/DefaultNodeOverwrite';
 import DefaultNodes from '../examples/DefaultNodes';
@@ -375,6 +376,11 @@ const routes: IRoute[] = [
     name: 'redux',
     path: 'redux',
     component: Redux,
+  },
+  {
+    name: 'Cycle Gate (verified)',
+    path: 'cycle-gate',
+    component: CycleGate,
   },
   {
     name: 'Validation',

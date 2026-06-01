@@ -140,6 +140,7 @@ export {
   getIncomers,
   getOutgoers,
   getConnectedEdges,
+  wouldCreateCycle,
 } from '@xyflow/system';
 
 export { addEdge, reconnectEdge } from './utils/edges';
