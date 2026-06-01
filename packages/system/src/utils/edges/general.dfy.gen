@@ -12,7 +12,9 @@ datatype AddEdgeOptions = AddEdgeOptions()
 
 datatype GetEdgeId = GetEdgeId()
 
-datatype ReconnectEdgeOptions = ReconnectEdgeOptions(shouldReplaceId: Option<bool>, getEdgeId: Option<GetEdgeId>)
+datatype OnError = OnError()
+
+datatype ReconnectEdgeOptions = ReconnectEdgeOptions(shouldReplaceId: Option<bool>, getEdgeId: Option<GetEdgeId>, onError: Option<OnError>)
 
 function getEdgeCenter(sourceX: int, sourceY: int, targetX: int, targetY: int): seq<real>
 {

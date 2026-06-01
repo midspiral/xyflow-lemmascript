@@ -1,7 +1,6 @@
 import {
   panBy as panBySystem,
   updateNodeInternals as updateNodeInternalsSystem,
-  addEdge as addEdgeUtil,
   initialConnection,
   errorMessages,
   type UpdateNodePositions,
@@ -20,7 +19,8 @@ import {
   Position
 } from '@xyflow/system';
 
-import type { EdgeTypes, NodeTypes, Node, Edge, FitViewOptions } from '$lib/types';
+import type { EdgeTypes, NodeTypes, Node, Edge, FitViewOptions, InternalNode } from '$lib/types';
+import { addEdge as addEdgeUtil } from '$lib/utils/edges';
 import { initialEdgeTypes, initialNodeTypes, getInitialStore } from './initial-store.svelte';
 import { type StoreSignals, type SvelteFlowStore, type SvelteFlowStoreActions } from './types';
 
@@ -48,7 +48,7 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
   }
 
   function addEdge(edgeParams: EdgeType | Connection) {
-    store.edges = addEdgeUtil<EdgeType>(edgeParams, store.edges);
+    store.edges = addEdgeUtil<EdgeType>(edgeParams, store.edges, { onError: store.onerror });
   }
 
   const updateNodePositions: UpdateNodePositions = (nodeDragItems, dragging = false) => {
@@ -125,7 +125,7 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
     store.nodes = store.nodes.map((node) => newNodes.get(node.id) ?? node);
   }
 
-  function fitView(options?: FitViewOptions) {
+  function fitView(options?: FitViewOptions<NodeType>) {
     // We either create a new Promise or reuse the existing one
     // Even if fitView is called multiple times in a row, we only end up with a single Promise
     const fitViewResolver = store.fitViewResolver ?? Promise.withResolvers<boolean>();
@@ -146,7 +146,7 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
     const currentPanZoom = store.panZoom;
 
     if (!currentPanZoom) {
-      return Promise.resolve(false);
+      return false;
     }
 
     await currentPanZoom.setViewport(
@@ -158,19 +158,19 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
       { duration: options?.duration, ease: options?.ease, interpolate: options?.interpolate }
     );
 
-    return Promise.resolve(true);
+    return true;
   }
 
-  function zoomBy(factor: number, options?: ViewportHelperFunctionOptions) {
+  async function zoomBy(factor: number, options?: ViewportHelperFunctionOptions) {
     const panZoom = store.panZoom;
     if (!panZoom) {
-      return Promise.resolve(false);
+      return false;
     }
 
     return panZoom.scaleBy(factor, options);
   }
 
-  function zoomIn(options?: ViewportHelperFunctionOptions) {
+  async function zoomIn(options?: ViewportHelperFunctionOptions) {
     return zoomBy(1.2, options);
   }
 
@@ -224,7 +224,7 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
     return [deselected, newElements];
   }
 
-  function unselectNodesAndEdges(params?: { nodes?: Node[]; edges?: Edge[] }) {
+  function unselectNodesAndEdges(params?: { nodes?: NodeType[]; edges?: EdgeType[] }) {
     const nodesToDeselect = params?.nodes ? new Set(params.nodes.map((node) => node.id)) : null;
     const [nodesDeselected, newNodes] = deselect(store.nodes, nodesToDeselect);
     if (nodesDeselected) {
@@ -278,7 +278,7 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
     const node = store.nodeLookup.get(id);
 
     if (!node) {
-      console.warn('012', errorMessages['error012'](id));
+      store.onerror('012', errorMessages['error012'](id));
       return;
     }
 
@@ -288,7 +288,7 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
     if (!node.selected) {
       addSelectedNodes([id]);
     } else if (unselect || (node.selected && store.multiselectionKeyPressed)) {
-      unselectNodesAndEdges({ nodes: [node], edges: [] });
+      unselectNodesAndEdges({ nodes: [node.internals.userNode], edges: [] });
 
       requestAnimationFrame(() => nodeRef?.blur());
     }
@@ -298,7 +298,7 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
     const edge = store.edgeLookup.get(id);
 
     if (!edge) {
-      console.warn('012', errorMessages['error012'](id));
+      store.onerror('016', errorMessages['error016'](id));
       return;
     }
 
@@ -377,7 +377,9 @@ export function createStore<NodeType extends Node = Node, EdgeType extends Edge 
     });
   }
 
-  const updateConnection: UpdateConnection = (newConnection: ConnectionState) => {
+  const updateConnection: UpdateConnection<InternalNode<NodeType>> = (
+    newConnection: ConnectionState<InternalNode<NodeType>>
+  ) => {
     store._connection = { ...newConnection };
   };
 

@@ -15,7 +15,6 @@ import type {
 } from '../types';
 import { type Viewport } from '../types';
 import { getNodePositionWithOrigin, isInternalNodeBase } from './graph';
-
 import { defaultAriaLabelConfig, type AriaLabelConfig } from '../constants';
 
 //@ verify
@@ -163,11 +162,9 @@ export const isRectObject = (obj: any): obj is Rect =>
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export const isNumeric = (n: any): n is number => !isNaN(n) && isFinite(n);
 
-// used for a11y key board controls for nodes and edges
-
-export const devWarn = (id: string, message: string) => {
+export const createDevWarn = (lib: string, helpUrl: string) => (id: string, message: string) => {
   if (process.env.NODE_ENV === 'development') {
-    console.warn(`[React Flow]: ${message} Help: https://reactflow.dev/error#${id}`);
+    console.warn(`[${lib}]: ${message} Help: ${helpUrl}error#${id}`);
   }
 };
 
@@ -226,7 +223,7 @@ function parsePadding(padding: PaddingWithUnit, viewport: number): number {
   }
 
   console.error(
-    `[React Flow] The padding value "${padding}" is invalid. Please provide a number or a string with a valid unit (px or %).`
+    `The padding value "${padding}" is invalid. Please provide a number or a string with a valid unit (px or %).`
   );
   return 0;
 }

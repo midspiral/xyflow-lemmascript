@@ -63,6 +63,8 @@
     }
   } = $derived(node);
 
+  // The id is stable and we don't want to pass signals everywhere
+  // svelte-ignore state_referenced_locally
   let { id } = node;
 
   let draggable = $derived(_draggable ?? store.nodesDraggable);
@@ -105,7 +107,7 @@
     $effect(() => {
       const valid = !!store.nodeTypes[type];
       if (!valid) {
-        console.warn('003', errorMessages['error003'](type!));
+        store.onerror('003', errorMessages['error003'](type!));
       }
     });
   }
@@ -289,6 +291,7 @@
     onfocus={focusable ? onFocus : undefined}
     tabIndex={focusable ? 0 : undefined}
     role={node.ariaRole ?? (focusable ? 'group' : undefined)}
+    aria-label={node.ariaLabel}
     aria-roledescription="node"
     aria-describedby={store.disableKeyboardA11y
       ? undefined

@@ -117,6 +117,8 @@ export {
   type FitBounds,
   type HandleConnection,
   type ZIndexMode,
+  type NodeHandle,
+  type UseNodeConnectionsParams,
 } from '@xyflow/system';
 
 // we need this workaround to prevent a duplicate identifier error
@@ -137,7 +139,7 @@ export {
   getNodesBounds,
   getIncomers,
   getOutgoers,
-  addEdge,
-  reconnectEdge,
   getConnectedEdges,
 } from '@xyflow/system';
+
+export { addEdge, reconnectEdge } from './utils/edges';

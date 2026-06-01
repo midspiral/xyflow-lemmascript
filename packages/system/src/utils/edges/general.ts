@@ -2,8 +2,10 @@
 //@ declare-type Connection { source: string, target: string, sourceHandle: string | undefined, targetHandle: string | undefined }
 //@ declare-type AddEdgeOptions { }
 //@ declare-type GetEdgeId { }
+//@ declare-type OnError { }
 import { Connection, InternalNodeBase, Transform, errorMessages, isEdgeBase, EdgeBase, ZIndexMode } from '../..';
-import { getOverlappingArea, boxToRect, nodeToBox, getBoundsOfBoxes, devWarn } from '../general';
+import type { OnError } from '../../types/general';
+import { getOverlappingArea, boxToRect, nodeToBox, getBoundsOfBoxes } from '../general';
 
 // this is used for straight edges and simple smoothstep edges (LTR, RTL, BTT, TTB)
 export function getEdgeCenter({
@@ -131,6 +133,10 @@ export type AddEdgeOptions = {
    * Custom function to generate edge IDs. If not provided, the default `getEdgeId` function is used.
    */
   getEdgeId?: GetEdgeId;
+  /**
+   * Called when edge validation fails. If not provided, a default dev warning is used.
+   */
+  onError?: OnError;
 };
 
 /**
@@ -156,7 +162,7 @@ export const addEdge = <EdgeType extends EdgeBase>(
   //@ ensures \result.length <= edges.length + 1
   if (!edgeParams.source || !edgeParams.target) {
     //@ skip
-    devWarn('006', errorMessages['error006']());
+    options.onError?.('006', errorMessages['error006']());
 
     return edges;
   }
@@ -203,6 +209,10 @@ export type ReconnectEdgeOptions = {
    * Custom function to generate edge IDs. If not provided, the default `getEdgeId` function is used.
    */
   getEdgeId?: GetEdgeId;
+  /**
+   * Called when edge validation fails. If not provided, a default dev warning is used.
+   */
+  onError?: OnError;
 };
 
 /**
@@ -238,7 +248,7 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
 
   if (!newConnection.source || !newConnection.target) {
     //@ skip
-    devWarn('006', errorMessages['error006']());
+    options.onError?.('006', errorMessages['error006']());
 
     return edges;
   }
@@ -250,7 +260,7 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
 
   if (!foundEdge) {
     //@ skip
-    devWarn('007', errorMessages['error007'](oldEdgeId));
+    options.onError?.('007', errorMessages['error007'](oldEdgeId));
 
     return edges;
   }
