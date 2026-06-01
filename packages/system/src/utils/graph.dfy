@@ -324,3 +324,38 @@ lemma AcyclicBridge(edges: seq<EdgeBase>, e: EdgeBase)
     }
   }
 }
+
+// ── Stage 3: verified topological-rank witness ─────────────────────────────────────
+// rank(n) = number of nodes that can reach n (its ancestors). For an acyclic graph this
+// is a topological numbering: it strictly increases along every edge, so processing
+// nodes by increasing rank is a safe evaluation order. (Sorting by the rank is trusted
+// glue; the monotonicity is what is proven.)
+ghost function ancestorsWithin(edges: seq<EdgeBase>, nodes: set<string>, n: string): set<string>
+{
+  set m | m in nodes && reach(edges, m, n)
+}
+
+lemma TopoRankMonotone(edges: seq<EdgeBase>, nodes: set<string>, u: string, v: string)
+  requires acyclic(edges)
+  requires hasEdge(edges, u, v)
+  requires u in nodes && v in nodes
+  ensures |ancestorsWithin(edges, nodes, u)| < |ancestorsWithin(edges, nodes, v)|
+{
+  HasEdgeReach(edges, u, v);   // reach(u, v)
+  // Every ancestor of u is an ancestor of v (m ->* u -> v).
+  forall m | m in ancestorsWithin(edges, nodes, u)
+    ensures m in ancestorsWithin(edges, nodes, v)
+  {
+    ReachTrans(edges, m, u, v);
+  }
+  ReachRefl(edges, v);
+  assert !reach(edges, v, u);   // acyclic: hasEdge(u,v) ==> !reach(v,u)
+  var au := ancestorsWithin(edges, nodes, u);
+  var av := ancestorsWithin(edges, nodes, v);
+  assert au <= av;                              // from the forall
+  assert v in av && v !in au;                   // v is an ancestor of v, not of u
+  // |av| = |au| + |av - au| (disjoint union), and av - au is non-empty (contains v).
+  assert au !! (av - au) && au + (av - au) == av;
+  assert |av| == |au| + |av - au|;
+  assert |av - au| >= 1;
+}

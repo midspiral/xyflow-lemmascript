@@ -143,7 +143,7 @@ export const getIncomers = <NodeType extends NodeBase = NodeBase, EdgeType exten
 
 // Reflexive reachability over the edge list: bounded BFS from `from`, terminating
 // because `visited` grows monotonically toward the finite set of node ids.
-function canReach(edges: EdgeBase[], from: string, to: string): boolean {
+export function canReach(edges: EdgeBase[], from: string, to: string): boolean {
   //@ verify
   let frontier: string[] = [from];
   let visited: string[] = [];

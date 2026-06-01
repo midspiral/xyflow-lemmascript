@@ -10,6 +10,7 @@ import {
   useEdgesState,
   useReactFlow,
   wouldCreateCycle,
+  canReach,
   MarkerType,
   type Node,
   type Edge,
@@ -64,6 +65,14 @@ const CycleGateFlow = () => {
     [getEdges, setEdges]
   );
 
+  // Stage 3: a safe evaluation order. rank(n) = #nodes that can reach n; sorting by
+  // ascending rank is a topological order — `TopoRankMonotone` (graph.dfy) proves rank
+  // strictly increases along every edge of an acyclic graph. The verified primitive is
+  // `canReach`; the count + sort here are trusted glue over it.
+  const ids = nodes.map((n) => n.id);
+  const rankOf = (n: string) => ids.filter((m) => canReach(edges, m, n)).length;
+  const order = [...ids].sort((a, b) => rankOf(a) - rankOf(b));
+
   return (
     <>
       {/* Make a cycle-creating drag obviously rejected: React Flow tags the in-progress
@@ -105,6 +114,9 @@ const CycleGateFlow = () => {
               A connection that would create a cycle (or a self-loop) turns{' '}
               <span style={{ color: '#e74c3c', fontWeight: 600 }}>red &amp; dashed</span> and is refused —
               proven in <code>graph.ts</code>.
+            </div>
+            <div style={{ marginTop: 8, color: '#2c3e50' }}>
+              Safe evaluation order: <strong>{order.join(' → ')}</strong>
             </div>
           </div>
         </Panel>

@@ -19,7 +19,9 @@ Gates connections so the graph stays acyclic. Node-level (source/target ids), ne
 
 **Acyclicity bridge** — `acyclic(edges) ==> ( acyclic(edges + e) <==> !wouldCreateCycle(edges, src, tgt) )`: gated insertion never creates a cycle, and never blocks a safe edge.
 
-Predicate `reach` and the path lemmas are hand-written in `graph.dfy` (additions-only). Trust manifest: proof is over `EdgeBase[]`/node ids (no React), and holds only if every commit routes through the gate. Demonstrated in the `CycleGate` example (`examples/react/src/examples/CycleGate/`) via `onConnect` (commit) + `isValidConnection` (drag feedback); drag a loop and it is rejected on screen.
+**Topological-rank witness** — `rank(n)` = number of nodes that can reach `n`; proven (`TopoRankMonotone`) to strictly increase along every edge of an acyclic graph, so sorting nodes by `rank` is a safe evaluation order. `canReach` is exported as a public primitive; the count + sort are trusted glue over it.
+
+Predicate `reach` and the path lemmas are hand-written in `graph.dfy` (additions-only). Trust manifest: proof is over `EdgeBase[]`/node ids (no React), and holds only if every commit routes through the gate. Demonstrated in the `CycleGate` example (`examples/react/src/examples/CycleGate/`) via `onConnect` (commit) + `isValidConnection` (drag feedback): drag a loop and it is rejected on screen (red dashed line), while a live "safe evaluation order" reflects the topological rank.
 
 ### Edge Utilities (`packages/system/src/utils/edges/general.ts`)
 
