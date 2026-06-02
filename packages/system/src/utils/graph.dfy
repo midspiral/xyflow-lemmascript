@@ -359,3 +359,43 @@ lemma TopoRankMonotone(edges: seq<EdgeBase>, nodes: set<string>, u: string, v: s
   assert |av| == |au| + |av - au|;
   assert |av - au| >= 1;
 }
+
+// ── Reconnect: removing an edge can't create a cycle ───────────────────────────────
+// `reconnectEdge` replaces an edge: remove the old one (-> a subgraph `base`) then add
+// the new endpoints. Gating that add keeps the whole graph acyclic.
+
+// If every edge of g1 is also an edge of g2, any g1-path is a g2-path.
+lemma ReachSubgraph(g1: seq<EdgeBase>, g2: seq<EdgeBase>, a: string, b: string)
+  requires forall x, y :: hasEdge(g1, x, y) ==> hasEdge(g2, x, y)
+  requires reach(g1, a, b)
+  ensures reach(g2, a, b)
+{
+  var p :| |p| >= 1 && p[0] == a && p[|p| - 1] == b && isPath(g1, p);
+  forall i | 0 <= i < |p| - 1 ensures hasEdge(g2, p[i], p[i + 1]) {}
+  assert isPath(g2, p);
+}
+
+// A subgraph of an acyclic graph is acyclic.
+lemma AcyclicSubgraph(g1: seq<EdgeBase>, g2: seq<EdgeBase>)
+  requires acyclic(g2)
+  requires forall x, y :: hasEdge(g1, x, y) ==> hasEdge(g2, x, y)
+  ensures acyclic(g1)
+{
+  forall a, b | hasEdge(g1, a, b) ensures !reach(g1, b, a) {
+    if reach(g1, b, a) {
+      ReachSubgraph(g1, g2, b, a);   // reach(g2, b, a) — but acyclic(g2) forbids it
+    }
+  }
+}
+
+// Reconnect bridge: from an acyclic graph, dropping the old edge to a subgraph `base`
+// and adding `e` keeps the graph acyclic iff the gate admits e (e.target can't already
+// reach e.source in `base`).
+lemma ReconnectBridge(edges: seq<EdgeBase>, base: seq<EdgeBase>, e: EdgeBase)
+  requires acyclic(edges)
+  requires forall x, y :: hasEdge(base, x, y) ==> hasEdge(edges, x, y)
+  ensures acyclic(base + [e]) <==> !reach(base, e.target, e.source)
+{
+  AcyclicSubgraph(base, edges);
+  AcyclicBridge(base, e);
+}

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -6,6 +6,7 @@ import {
   Controls,
   Panel,
   addEdge,
+  reconnectEdge,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -15,6 +16,7 @@ import {
   type Node,
   type Edge,
   type OnConnect,
+  type OnReconnect,
   type IsValidConnection,
   type DefaultEdgeOptions,
 } from '@xyflow/react';
@@ -46,11 +48,17 @@ const CycleGateFlow = () => {
   // Read the LIVE edges from the store, never a captured `edges` closure — so the gate
   // is correct even while you build the graph up edge by edge.
   const { getEdges } = useReactFlow();
+  // While an edge is being reconnected, exclude *that* edge from the cycle check — it is
+  // about to be removed, so it must not count toward reachability (ReconnectBridge).
+  const reconnecting = useRef<string | null>(null);
 
   // Verified gate (proven sound + complete in packages/system/src/utils/graph.ts).
   // Live drag feedback: the connection line turns red/dashed while it would close a loop.
   const isValidConnection: IsValidConnection = useCallback(
-    (c) => c.source != null && c.target != null && !wouldCreateCycle(getEdges(), c.source, c.target),
+    (c) => {
+      const live = getEdges().filter((e) => e.id !== reconnecting.current);
+      return c.source != null && c.target != null && !wouldCreateCycle(live, c.source, c.target);
+    },
     [getEdges]
   );
 
@@ -60,6 +68,23 @@ const CycleGateFlow = () => {
     (params) => {
       if (params.source != null && params.target != null && !wouldCreateCycle(getEdges(), params.source, params.target)) {
         setEdges((eds) => addEdge(params, eds));
+      }
+    },
+    [getEdges, setEdges]
+  );
+
+  // Reconnect closes the same hole: dragging an edge's endpoint to new nodes is another
+  // commit path. Gate it against the graph with the OLD edge removed (`base`), exactly
+  // the `ReconnectBridge` setup — so the acyclic invariant holds for edge moves too.
+  const onReconnect: OnReconnect = useCallback(
+    (oldEdge, newConnection) => {
+      const base = getEdges().filter((e) => e.id !== oldEdge.id);
+      if (
+        newConnection.source != null &&
+        newConnection.target != null &&
+        !wouldCreateCycle(base, newConnection.source, newConnection.target)
+      ) {
+        setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
       }
     },
     [getEdges, setEdges]
@@ -90,6 +115,9 @@ const CycleGateFlow = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onReconnect={onReconnect}
+        onReconnectStart={(_, edge) => (reconnecting.current = edge.id)}
+        onReconnectEnd={() => (reconnecting.current = null)}
         isValidConnection={isValidConnection}
         defaultEdgeOptions={edgeOptions}
         fitView
@@ -113,7 +141,7 @@ const CycleGateFlow = () => {
               Drag from a node&apos;s <em>bottom</em> handle to another node&apos;s <em>top</em> handle.
               A connection that would create a cycle (or a self-loop) turns{' '}
               <span style={{ color: '#e74c3c', fontWeight: 600 }}>red &amp; dashed</span> and is refused —
-              proven in <code>graph.ts</code>.
+              proven in <code>graph.ts</code>. Reconnecting an edge&apos;s endpoint is gated the same way.
             </div>
             <div style={{ marginTop: 8, color: '#2c3e50' }}>
               Safe evaluation order: <strong>{order.join(' → ')}</strong>
