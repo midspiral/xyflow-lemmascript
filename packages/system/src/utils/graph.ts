@@ -169,6 +169,21 @@ export function wouldCreateCycle(edges: EdgeBase[], source: string, target: stri
   return canReach(edges, target, source);
 }
 
+// The dual of the gate: decide whether the whole graph is already acyclic — no edge's
+// target can reach its source. Use it to establish the base case the gate then preserves
+// (e.g. validate an initial or imported graph).
+export function isAcyclic(edges: EdgeBase[]): boolean {
+  //@ verify
+  let i = 0;
+  while (i < edges.length) {
+    if (canReach(edges, edges[i].target, edges[i].source)) {
+      return false;
+    }
+    i = i + 1;
+  }
+  return true;
+}
+
 export const getNodePositionWithOrigin = (node: NodeBase, nodeOrigin: NodeOrigin = [0, 0]): XYPosition => {
   const { width, height } = getNodeDimensions(node);
   const origin = node.origin ?? nodeOrigin;

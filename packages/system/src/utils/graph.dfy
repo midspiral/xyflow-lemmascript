@@ -177,6 +177,33 @@ method wouldCreateCycle(edges: seq<EdgeBase>, source: string, target: string) re
   return i_t0;
 }
 
+method isAcyclic(edges: seq<EdgeBase>) returns (res: bool)
+  ensures res ==> acyclic(edges)             // soundness: a true answer is genuinely acyclic
+  ensures acyclic(edges) ==> res             // completeness: an acyclic graph is accepted
+{
+  var i := 0;
+  while (i < |edges|)
+    invariant 0 <= i <= |edges|
+    invariant forall k :: 0 <= k < i ==> !reach(edges, edges[k].target, edges[k].source)
+    decreases |edges| - i
+  {
+    var i_t1 := canReach(edges, edges[i].target, edges[i].source);
+    if i_t1 {
+      assert hasEdge(edges, edges[i].source, edges[i].target);   // witnessed by index i — this edge breaks acyclicity
+      return false;
+    }
+    assert !reach(edges, edges[i].target, edges[i].source);      // i_t1 false ⇒ no back-path (canReach is complete)
+    i := (i + 1);
+  }
+  // Every edge was checked: no edge's target reaches its source ⇒ acyclic.
+  assert acyclic(edges) by {
+    forall a, b | hasEdge(edges, a, b) ensures !reach(edges, b, a) {
+      var k :| 0 <= k < |edges| && edges[k].source == a && edges[k].target == b;
+    }
+  }
+  return true;
+}
+
 // ── Theorem 3: gated insertion preserves acyclicity ────────────────────────────────
 // A graph is acyclic iff no edge's target can reach its source. Equivalently: no node
 // lies on a nontrivial cycle (and, since reach is reflexive, no self-loops).

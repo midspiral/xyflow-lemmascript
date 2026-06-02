@@ -142,6 +142,7 @@ export {
   getConnectedEdges,
   wouldCreateCycle,
   canReach,
+  isAcyclic,
 } from '@xyflow/system';
 
 export { addEdge, reconnectEdge } from './utils/edges';

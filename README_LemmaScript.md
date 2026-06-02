@@ -21,6 +21,8 @@ Gates connections so the graph stays acyclic. Node-level (source/target ids), ne
 
 **Reconnect** — `ReconnectBridge`: a subgraph of an acyclic graph is acyclic (removing an edge can't create a cycle), so reconnecting an edge (remove the old one, gated-add the new endpoints) preserves acyclicity too. The gate covers `onReconnect`, not just `onConnect` — closing every edge-mutation path.
 
+**Base case** — `isAcyclic(edges)` decides whether the whole graph is acyclic (sound *and* complete: `isAcyclic ⟺ acyclic`), the dual of the gate. Run it on an initial or imported graph to *establish* the invariant the gate then *maintains* — together they make "the graph is always acyclic" airtight. The demo runs it live as a continuous invariant check.
+
 **Topological-rank witness** — `rank(n)` = number of nodes that can reach `n`; proven (`TopoRankMonotone`) to strictly increase along every edge of an acyclic graph, so sorting nodes by `rank` is a safe evaluation order. `canReach` is exported as a public primitive; the count + sort are trusted glue over it.
 
 Predicate `reach` and the path lemmas are hand-written in `graph.dfy` (additions-only). Trust manifest: proof is over `EdgeBase[]`/node ids (no React), and holds only if every commit routes through the gate. Demonstrated in the `CycleGate` example (`examples/react/src/examples/CycleGate/`) via `onConnect` (commit) + `isValidConnection` (drag feedback): drag a loop and it is rejected on screen (red dashed line), while a live "safe evaluation order" reflects the topological rank.

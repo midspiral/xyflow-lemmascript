@@ -12,6 +12,7 @@ import {
   useReactFlow,
   wouldCreateCycle,
   canReach,
+  isAcyclic,
   MarkerType,
   type Node,
   type Edge,
@@ -98,6 +99,10 @@ const CycleGateFlow = () => {
   const rankOf = (n: string) => ids.filter((m) => canReach(edges, m, n)).length;
   const order = [...ids].sort((a, b) => rankOf(a) - rankOf(b));
 
+  // Live invariant check (verified `isAcyclic`, the dual of the gate): establishes the
+  // base case and continuously confirms the gate keeps the graph acyclic. Always ✓ here.
+  const acyclic = isAcyclic(edges);
+
   return (
     <>
       {/* Make a cycle-creating drag obviously rejected: React Flow tags the in-progress
@@ -145,6 +150,9 @@ const CycleGateFlow = () => {
             </div>
             <div style={{ marginTop: 8, color: '#2c3e50' }}>
               Safe evaluation order: <strong>{order.join(' → ')}</strong>
+            </div>
+            <div style={{ marginTop: 6, fontWeight: 600, color: acyclic ? '#1e8449' : '#c0392b' }}>
+              Invariant (live, verified <code>isAcyclic</code>): {acyclic ? 'acyclic ✓' : 'CYCLE ✗'}
             </div>
           </div>
         </Panel>
