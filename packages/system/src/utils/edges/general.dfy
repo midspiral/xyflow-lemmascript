@@ -37,7 +37,7 @@ lemma getEdgeCenter_ensures(sourceX: int, sourceY: int, targetX: int, targetY: i
 
 function connectionExists(edge: EdgeBase, edges: seq<EdgeBase>): bool
 {
-  (exists el :: el in edges && ((((el.source == edge.source) && (el.target == edge.target)) && ((el.sourceHandle == edge.sourceHandle) || ((match el.sourceHandle { case Some(i_value) => false case None => true }) && (match edge.sourceHandle { case Some(i_value) => false case None => true })))) && ((el.targetHandle == edge.targetHandle) || ((match el.targetHandle { case Some(i_value) => false case None => true }) && (match edge.targetHandle { case Some(i_value) => false case None => true })))))
+  (exists el :: el in edges && ((((el.source == edge.source) && (el.target == edge.target)) && ((el.sourceHandle == edge.sourceHandle) || ((match el.sourceHandle { case Some(i_value) => !((|i_value| > 0)) case None => true }) && (match edge.sourceHandle { case Some(i_value) => !((|i_value| > 0)) case None => true })))) && ((el.targetHandle == edge.targetHandle) || ((match el.targetHandle { case Some(i_value) => !((|i_value| > 0)) case None => true }) && (match edge.targetHandle { case Some(i_value) => !((|i_value| > 0)) case None => true })))))
 }
 
 lemma connectionExists_ensures(edge: EdgeBase, edges: seq<EdgeBase>)
