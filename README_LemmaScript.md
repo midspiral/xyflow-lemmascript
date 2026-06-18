@@ -1,5 +1,8 @@
 # xyflow — Verified with LemmaScript
 
+[![LemmaScript: verified](https://img.shields.io/badge/LemmaScript-verified-brightgreen)](https://github.com/midspiral/xyflow-lemmascript/actions/workflows/lemmascript.yml)
+
+
 This is a fork of [xyflow/xyflow](https://github.com/xyflow/xyflow) with formal verification of core utility functions using [LemmaScript](https://github.com/midspiral/LemmaScript).
 [View as diff](https://github.com/midspiral/xyflow-lemmascript/compare/main..lemmascript).
 
