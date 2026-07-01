@@ -2,6 +2,8 @@
 
 datatype Option<T> = None | Some(value: T)
 
+type Unknown(==, 0)
+
 function MathAbs(x: int): nat { if x >= 0 then x else -x }
 
 datatype EdgeBase = EdgeBase(id: string, source: string, target: string, sourceHandle: Option<string>, targetHandle: Option<string>)
@@ -82,7 +84,7 @@ method reconnectEdge(oldEdge: EdgeBase, newConnection: Connection, edges: seq<Ed
   ensures ((exists i: nat :: ((i < |edges|) && (edges[i].id == oldEdge.id))) ==> (newConnection.source != "") ==> (newConnection.target != "") ==> exists j: nat :: (((j < |res|) && (res[j].source == newConnection.source)) && (res[j].target == newConnection.target)))
 {
   var oldEdgeId: string := *;
-  var rest: int := *;
+  var rest: Unknown := *;
   assume {:axiom} (oldEdgeId == oldEdge.id);
   if ((newConnection.source == "") || (newConnection.target == "")) {
     return edges;
