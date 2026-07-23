@@ -133,15 +133,18 @@ method canReach(edges: seq<EdgeBase>, from: string, to: string) returns (res: bo
       assert cur in nodeUniverse(edges, from) - vset;   // ⇒ the difference strictly shrinks
       visited := (visited + [cur]);
       vset := vset + {cur};                    // cur ∉ vset (guard) ⇒ |universe - vset| drops by 1
-      var succ := Std.Collections.Seq.Map((e: EdgeBase) => e.target, Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges));
+      var succ := (var s_map := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges); seq(|s_map|, i_map requires 0 <= i_map < |s_map| => var e := s_map[i_map]; e.target));
+      // `out` mirrors the comprehension's let-bound receiver. succ[j] == out[j].target
+      // holds because the comprehension indexes a VARIABLE (s_map), so Dafny's index
+      // axiom fires — it would not over an inlined `Filter(..)` (§8.6 E2).
+      ghost var out := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges);
       // succ elements are targets of cur's out-edges: reachable, and in the universe.
       forall x | x in succ
         ensures reach(edges, from, x) && x in nodeUniverse(edges, from)
       {
-        var filtered := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges);
         var j :| 0 <= j < |succ| && succ[j] == x;
-        assert filtered[j].source == cur && filtered[j].target == x;
-        FilterIn((e: EdgeBase) => (e.source == cur), edges, filtered[j]);
+        assert out[j].source == cur && out[j].target == x;
+        FilterIn((e: EdgeBase) => (e.source == cur), edges, out[j]);
         assert hasEdge(edges, cur, x);
         ReachExtend(edges, from, cur, x);
       }
@@ -149,11 +152,10 @@ method canReach(edges: seq<EdgeBase>, from: string, to: string) returns (res: bo
       forall t | hasEdge(edges, cur, t)
         ensures t in succ
       {
-        var filtered := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges);
         var i :| 0 <= i < |edges| && edges[i].source == cur && edges[i].target == t;
         FilterContains((e: EdgeBase) => (e.source == cur), edges, i);
-        var j :| 0 <= j < |filtered| && filtered[j] == edges[i];
-        assert succ[j] == filtered[j].target == t;
+        var j :| 0 <= j < |out| && out[j] == edges[i];
+        assert succ[j] == out[j].target == t;
       }
       frontier := (frontier + succ);
     }
