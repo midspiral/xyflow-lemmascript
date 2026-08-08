@@ -91,7 +91,7 @@ Annotations are TypeScript comments — invisible to `tsc`, visible to LemmaScri
 ```typescript
 //@ verify
 //@ requires min <= max
-//@ ensures min <= \result && \result <= max
+//@ ensures min <= $result && $result <= max
 export const clamp = (val: number, min = 0, max = 1): number =>
   Math.min(Math.max(val, min), max);
 ```

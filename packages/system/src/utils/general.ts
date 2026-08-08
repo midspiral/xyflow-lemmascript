@@ -19,7 +19,7 @@ import { defaultAriaLabelConfig, type AriaLabelConfig } from '../constants';
 
 //@ verify
 //@ requires min <= max
-//@ ensures min <= \result && \result <= max
+//@ ensures min <= $result && $result <= max
 export const clamp = (val: number, min = 0, max = 1): number => Math.min(Math.max(val, min), max);
 
 export const clampPosition = (
@@ -80,10 +80,10 @@ export const calcAutoPan = (
 };
 
 //@ verify
-//@ ensures \result.x <= box1.x && \result.x <= box2.x
-//@ ensures \result.y <= box1.y && \result.y <= box2.y
-//@ ensures \result.x2 >= box1.x2 && \result.x2 >= box2.x2
-//@ ensures \result.y2 >= box1.y2 && \result.y2 >= box2.y2
+//@ ensures $result.x <= box1.x && $result.x <= box2.x
+//@ ensures $result.y <= box1.y && $result.y <= box2.y
+//@ ensures $result.x2 >= box1.x2 && $result.x2 >= box2.x2
+//@ ensures $result.y2 >= box1.y2 && $result.y2 >= box2.y2
 export const getBoundsOfBoxes = (box1: Box, box2: Box): Box => ({
   x: Math.min(box1.x, box2.x),
   y: Math.min(box1.y, box2.y),
@@ -94,10 +94,10 @@ export const getBoundsOfBoxes = (box1: Box, box2: Box): Box => ({
 //@ declare-type Box { x: number, y: number, x2: number, y2: number }
 //@ declare-type Rect { x: number, y: number, width: number, height: number }
 //@ verify
-//@ ensures \result.x === x
-//@ ensures \result.y === y
-//@ ensures \result.x2 === x + width
-//@ ensures \result.y2 === y + height
+//@ ensures $result.x === x
+//@ ensures $result.y === y
+//@ ensures $result.x2 === x + width
+//@ ensures $result.y2 === y + height
 export const rectToBox = ({ x, y, width, height }: Rect): Box => ({
   x,
   y,
@@ -106,10 +106,10 @@ export const rectToBox = ({ x, y, width, height }: Rect): Box => ({
 });
 
 //@ verify
-//@ ensures \result.x === x
-//@ ensures \result.y === y
-//@ ensures \result.width === x2 - x
-//@ ensures \result.height === y2 - y
+//@ ensures $result.x === x
+//@ ensures $result.y === y
+//@ ensures $result.width === x2 - x
+//@ ensures $result.height === y2 - y
 export const boxToRect = ({ x, y, x2, y2 }: Box): Rect => ({
   x,
   y,
@@ -147,7 +147,7 @@ export const getBoundsOfRects = (rect1: Rect, rect2: Rect): Rect =>
   boxToRect(getBoundsOfBoxes(rectToBox(rect1), rectToBox(rect2)));
 
 //@ verify
-//@ ensures \result >= 0
+//@ ensures $result >= 0
 export const getOverlappingArea = (rectA: Rect, rectB: Rect): number => {
   const xOverlap = Math.max(0, Math.min(rectA.x + rectA.width, rectB.x + rectB.width) - Math.max(rectA.x, rectB.x));
   const yOverlap = Math.max(0, Math.min(rectA.y + rectA.height, rectB.y + rectB.height) - Math.max(rectA.y, rectB.y));
@@ -408,8 +408,8 @@ export function evaluateAbsolutePosition(
 }
 
 //@ verify
-//@ ensures \result === true ==> a.size === b.size
-//@ ensures \result === true ==> forall(x: string, x in a ==> x in b)
+//@ ensures implies($result === true, a.size === b.size)
+//@ ensures implies($result === true, forall((x: string) => implies(x in a, x in b)))
 export function areSetsEqual(a: Set<string>, b: Set<string>) {
   if (a.size !== b.size) {
     return false;

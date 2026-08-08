@@ -20,13 +20,13 @@ export function getEdgeCenter({
   targetY: number;
 }): [number, number, number, number] {
   //@ verify
-  //@ type \result real[]
-  //@ ensures \result[2] >= 0
-  //@ ensures \result[3] >= 0
-  //@ ensures (sourceX <= targetX ==> sourceX <= \result[0] && \result[0] <= targetX)
-  //@ ensures (targetX <= sourceX ==> targetX <= \result[0] && \result[0] <= sourceX)
-  //@ ensures (sourceY <= targetY ==> sourceY <= \result[1] && \result[1] <= targetY)
-  //@ ensures (targetY <= sourceY ==> targetY <= \result[1] && \result[1] <= sourceY)
+  //@ type $result real[]
+  //@ ensures $result[2] >= 0
+  //@ ensures $result[3] >= 0
+  //@ ensures implies(sourceX <= targetX, sourceX <= $result[0] && $result[0] <= targetX)
+  //@ ensures implies(targetX <= sourceX, targetX <= $result[0] && $result[0] <= sourceX)
+  //@ ensures implies(sourceY <= targetY, sourceY <= $result[1] && $result[1] <= targetY)
+  //@ ensures implies(targetY <= sourceY, targetY <= $result[1] && $result[1] <= sourceY)
   const xOffset = Math.abs(targetX - sourceX) / 2;
   const centerX = targetX < sourceX ? targetX + xOffset : targetX - xOffset;
 
@@ -117,8 +117,8 @@ export const getEdgeId = ({ source, sourceHandle, target, targetHandle }: Connec
 
 const connectionExists = (edge: EdgeBase, edges: EdgeBase[]) => {
   //@ verify
-  //@ ensures \result === true ==> edges.length > 0
-  //@ ensures edges.length === 0 ==> \result === false
+  //@ ensures implies($result === true, edges.length > 0)
+  //@ ensures implies(edges.length === 0, $result === false)
   return edges.some(
     (el) =>
       el.source === edge.source &&
@@ -158,8 +158,8 @@ export const addEdge = <EdgeType extends EdgeBase>(
   options: AddEdgeOptions = {}
 ): EdgeType[] => {
   //@ verify
-  //@ ensures \result.length >= edges.length
-  //@ ensures \result.length <= edges.length + 1
+  //@ ensures $result.length >= edges.length
+  //@ ensures $result.length <= edges.length + 1
   if (!edgeParams.source || !edgeParams.target) {
     //@ skip
     options.onError?.('006', errorMessages['error006']());
@@ -238,10 +238,10 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
   options: ReconnectEdgeOptions = { shouldReplaceId: true }
 ): EdgeType[] => {
   //@ verify
-  //@ requires forall(i: nat, forall(j: nat, i < edges.length && j < edges.length && i !== j ==> edges[i].id !== edges[j].id))
-  //@ ensures \result.length >= 1 || edges.length === 0
-  //@ ensures \result.length <= edges.length
-  //@ ensures (exists(i: nat, i < edges.length && edges[i].id === oldEdge.id)) && newConnection.source !== "" && newConnection.target !== "" ==> exists(j: nat, j < \result.length && \result[j].source === newConnection.source && \result[j].target === newConnection.target)
+  //@ requires forall((i: nat) => forall((j: nat) => implies(i < edges.length && j < edges.length && i !== j, edges[i].id !== edges[j].id)))
+  //@ ensures $result.length >= 1 || edges.length === 0
+  //@ ensures $result.length <= edges.length
+  //@ ensures implies(exists((i: nat) => i < edges.length && edges[i].id === oldEdge.id) && newConnection.source !== "" && newConnection.target !== "", exists((j: nat) => j < $result.length && $result[j].source === newConnection.source && $result[j].target === newConnection.target))
   //@ havoc : string, unknown
   const { id: oldEdgeId, ...rest } = oldEdge;
   //@ assume oldEdgeId === oldEdge.id
@@ -255,8 +255,8 @@ export const reconnectEdge = <EdgeType extends EdgeBase>(
 
   //@ havoc : EdgeBase | undefined
   const foundEdge = edges.find((e) => e.id === oldEdge.id) as EdgeType;
-  //@ assume foundEdge !== undefined ==> exists(i: nat, i < edges.length && edges[i].id === oldEdge.id)
-  //@ assume foundEdge === undefined ==> forall(i: nat, i < edges.length ==> edges[i].id !== oldEdge.id)
+  //@ assume implies(foundEdge !== undefined, exists((i: nat) => i < edges.length && edges[i].id === oldEdge.id))
+  //@ assume implies(foundEdge === undefined, forall((i: nat) => implies(i < edges.length, edges[i].id !== oldEdge.id)))
 
   if (!foundEdge) {
     //@ skip
