@@ -91,6 +91,11 @@ function getOverlappingArea(rectA: Rect, rectB: Rect): int
   (xOverlap * yOverlap)
 }
 
+lemma getOverlappingArea_ensures(rectA: Rect, rectB: Rect)
+  ensures (getOverlappingArea(rectA, rectB) >= 0)
+{
+}
+
 method areSetsEqual(a: set<string>, b: set<string>) returns (res: bool)
   ensures ((res == true) ==> (|a| == |b|))
   ensures ((res == true) ==> forall x :: ((x in a) ==> (x in b)))
