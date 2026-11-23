@@ -133,7 +133,7 @@ method canReach(edges: seq<EdgeBase>, from: string, to: string) returns (res: bo
       assert cur in nodeUniverse(edges, from) - vset;   // ⇒ the difference strictly shrinks
       visited := (visited + [cur]);
       vset := vset + {cur};                    // cur ∉ vset (guard) ⇒ |universe - vset| drops by 1
-      var succ := (var s_map := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges); seq(|s_map|, i_map requires 0 <= i_map < |s_map| => var e := s_map[i_map]; e.target));
+      var succ := (var s_map := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges); seq(|s_map|, i_map requires 0 <= i_map < |s_map| => var e_2 := s_map[i_map]; e_2.target));
       // `out` mirrors the comprehension's let-bound receiver. succ[j] == out[j].target
       // holds because the comprehension indexes a VARIABLE (s_map), so Dafny's index
       // axiom fires — it would not over an inlined `Filter(..)` (§8.6 E2).

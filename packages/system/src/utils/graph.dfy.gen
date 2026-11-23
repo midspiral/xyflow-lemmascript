@@ -15,7 +15,7 @@ method canReach(edges: seq<EdgeBase>, from: string, to: string) returns (res: bo
     }
     if !((cur in visited)) {
       visited := (visited + [cur]);
-      var succ := (var s_map := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges); seq(|s_map|, i_map requires 0 <= i_map < |s_map| => var e := s_map[i_map]; e.target));
+      var succ := (var s_map := Std.Collections.Seq.Filter((e: EdgeBase) => (e.source == cur), edges); seq(|s_map|, i_map requires 0 <= i_map < |s_map| => var e_2 := s_map[i_map]; e_2.target));
       frontier := (frontier + succ);
     }
   }
