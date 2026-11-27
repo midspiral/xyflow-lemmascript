@@ -91,7 +91,7 @@ method reconnectEdge(oldEdge: EdgeBase, newConnection: Connection, edges: seq<Ed
   }
   var foundEdge: Option<EdgeBase> := *;
   assume {:axiom} (match foundEdge { case Some(i_foundEdge_val) => exists i: nat :: ((i < |edges|) && (edges[i].id == oldEdge.id)) case None => true });
-  assume {:axiom} ((match foundEdge { case Some(i_) => false case None => true }) ==> forall i: nat :: ((i < |edges|) ==> (edges[i].id != oldEdge.id)));
+  assume {:axiom} ((match foundEdge { case Some(_) => false case None => true }) ==> forall i: nat :: ((i < |edges|) ==> (edges[i].id != oldEdge.id)));
   match foundEdge {
     case Some(i_foundEdge_val) =>
       var edgeIdGenerator: GetEdgeId := *;
